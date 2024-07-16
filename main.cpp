@@ -4,9 +4,9 @@
 #include <string>
 #include <map>
 #include <queue>
-#include <algorithm>
 #include <unordered_map>
 #include <set>
+
 
 using namespace std;
 
@@ -45,14 +45,18 @@ public:
     }
 
     void agregarNodo(string nombre) {
-        nodos[nombre] = new Nodo(nombre);
+        if (nodos.find(nombre) == nodos.end()) {
+            nodos[nombre] = new Nodo(nombre);
+        }
     }
 
     void conectarNodos(string nombre1, string nombre2) {
         Nodo* nodo1 = nodos[nombre1];
         Nodo* nodo2 = nodos[nombre2];
-        nodo1->adyacentes.push_back(nodo2);
-        nodo2->adyacentes.push_back(nodo1);
+        if (nodo1 && nodo2) {
+            nodo1->adyacentes.push_back(nodo2);
+            nodo2->adyacentes.push_back(nodo1);
+        }
     }
 
     // Método de búsqueda para encontrar la ruta más cercana usando BFS
@@ -90,7 +94,32 @@ public:
             ruta.push_front(at);
         }
 
+        if (ruta.front() != inicio) {
+            ruta.clear(); // Si no se puede encontrar una ruta válida
+        }
+
         return ruta;
+    }
+
+    // Método para obtener los lugares cercanos (adyacentes) a la posición actual del jugador
+    list<string> obtenerLugaresCercanos(string posicionActual) {
+        list<string> lugaresCercanos;
+        if (nodos.find(posicionActual) != nodos.end()) {
+            for (Nodo* adyacente : nodos[posicionActual]->adyacentes) {
+                lugaresCercanos.push_back(adyacente->nombre);
+            }
+        }
+        return lugaresCercanos;
+    }
+
+    void imprimirMapa() {
+        for (const auto& nodo : nodos) {
+            cout << nodo.first << " conectado con: ";
+            for (const auto& adyacente : nodo.second->adyacentes) {
+                cout << adyacente->nombre << " ";
+            }
+            cout << endl;
+        }
     }
 };
 
@@ -181,38 +210,34 @@ public:
 };
 
 int main() {
-    // Crear el juego
-    Juego miJuego("Heroe", 1);
 
-    // Agregar armaduras al personaje
-    Personaje& jugador = miJuego.obtenerJugador();
-    jugador.agregarArmadura(Armadura("Casco", 5));
-    jugador.agregarArmadura(Armadura("Pechera", 10));
-    jugador.mostrarArmaduras();
-
-    // Agregar enemigos
-    miJuego.agregarEnemigo("Goblin", 3);
-    miJuego.agregarEnemigo("Orco", 5);
-
-    // Configurar el mapa
     Mapa* mapa = Mapa::obtenerInstancia();
     mapa->agregarNodo("Aldea");
     mapa->agregarNodo("Bosque");
     mapa->agregarNodo("Montaña");
+    mapa->agregarNodo("Cueva");
     mapa->conectarNodos("Aldea", "Bosque");
     mapa->conectarNodos("Bosque", "Montaña");
+    mapa->conectarNodos("Montaña", "Cueva");
 
-    // Iniciar el juego
-    miJuego.iniciar();
+    // Imprimir el mapa
+    mapa->imprimirMapa();
 
-    // Navegar el mapa
-    miJuego.navegarMapa("Montaña");
+    // Obtener y mostrar lugares cercanos a la Aldea
+    list<string> lugaresCercanos = mapa->obtenerLugaresCercanos("Aldea");
+    cout << "Lugares cercanos a Aldea: ";
+    for (const string& lugar : lugaresCercanos) {
+        cout << lugar << " ";
+    }
+    cout << endl;
 
-    // Guardar partida
-    miJuego.guardarPartida();
-
-    // Alertar victoria
-    miJuego.alertarVictoria();
+    // Encontrar la ruta desde la Aldea a la Montaña
+    list<string> ruta = mapa->encontrarRuta("Aldea", "Montaña");
+    cout << "Ruta de Aldea a Montaña: ";
+    for (const string& lugar : ruta) {
+        cout << lugar << " ";
+    }
+    cout << endl;
 
     return 0;
 }
