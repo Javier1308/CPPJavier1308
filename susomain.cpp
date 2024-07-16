@@ -1,77 +1,109 @@
 #include <iostream>
 #include <vector>
 #include <queue>
+#include <algorithm>
 
-template <typename T>
-class BoundedQueue
+struct notification
 {
-private:
-    std::vector<T> queue;
-    int maxSize;
-    int front;
-    int rear;
-    int currentSize;
+    std::string message;
+    std::string date;
+    std::string time;
 
-public:
-    BoundedQueue(int size) : maxSize(size), front(0), rear(-1), currentSize(0)
+    notification(std::string msg, std::string dt, std::string tm) : message(msg), date(dt), time(tm) {}
+    notification() {}
+
+    std::string getMessage() const
     {
-        queue.resize(size);
+        return message;
     }
 
-    bool enqueue(const T &item)
+    std::string getDate() const
+    {
+        return date;
+    }
+
+    std::string getTime() const
+    {
+        return time;
+    }
+};
+
+class NotiBuilder
+{
+    notification *notif;
+
+public:
+    NotiBuilder() : notif(new notification()) {}
+
+    NotiBuilder &setMessage(std::string msg)
+    {
+        notif->message = msg;
+        return *this;
+    }
+
+    NotiBuilder &setDate(std::string dt)
+    {
+        notif->date = dt;
+        return *this;
+    }
+
+    NotiBuilder &setTime(std::string tm)
+    {
+        notif->time = tm;
+        return *this;
+    }
+
+    notification build()
+    {
+        notification temp = *notif;
+        notif = new notification();
+        return temp;
+    }
+};
+
+class QueueNotificator
+{
+private:
+    std::queue<notification> queue;
+    int maxSize;
+
+public:
+    QueueNotificator(int size_max) : maxSize(size_max) {}
+
+    void push(const notification &notif)
     {
         if (isFull())
         {
-            std::cout << "Queue is full. Cannot enqueue item: " << item << std::endl;
-            return false;
+            queue.pop();
         }
-        rear = (rear + 1) % maxSize;
-        queue[rear] = item;
-        currentSize++;
-        return true;
-    }
-
-    bool dequeue(T &item)
-    {
-        if (isEmpty())
-        {
-            std::cout << "Queue is empty. Cannot dequeue item." << std::endl;
-            return false;
-        }
-        item = queue[front];
-        front = (front + 1) % maxSize;
-        currentSize--;
-        return true;
+        queue.push(notif);
     }
 
     bool isFull() const
     {
-        return currentSize == maxSize;
+        return queue.size() == maxSize;
     }
 
     bool isEmpty() const
     {
-        return currentSize == 0;
+        return queue.empty();
     }
 
     int size() const
     {
-        return currentSize;
+        return queue.size();
     }
 
-    void display() const
+    std::vector<notification> display()
     {
-        if (isEmpty())
+        std::queue<notification> temp = queue;
+        std::vector<notification> output;
+        while (!temp.empty())
         {
-            std::cout << "Queue is empty." << std::endl;
-            return;
+            output.push_back(temp.front());
+            temp.pop();
         }
-        std::cout << "Queue contents: ";
-        for (int i = 0; i < currentSize; i++)
-        {
-            std::cout << queue[(front + i) % maxSize] << " ";
-        }
-        std::cout << std::endl;
+        return output;
     }
 };
 
@@ -235,6 +267,28 @@ public:
 
 int main()
 {
+
+    // Crear notificaciones
+    NotiBuilder notis;
+    QueueNotificator notificator(3);
+
+    notificator.push(notis.setMessage("Hola").setDate("2021-09-01").setTime("10:00").build());
+    notificator.push(notis.setMessage("Hola2").setDate("2021-09-01").setTime("10:01").build());
+    notificator.push(notis.setMessage("Hola3").setDate("2021-09-01").setTime("10:02").build());
+
+    std::cout << "1:" << std::endl;
+    std::vector<notification> temp = notificator.display();
+    std::for_each(temp.begin(), temp.end(), [](notification &n)
+                  { std::cout << n.getMessage() << " " << n.getDate() << " " << n.getTime() << std::endl; });
+
+    notificator.push(notis.setMessage("Hola4").setDate("2021-09-01").setTime("10:03").build());
+
+    std::cout << "2:" << std::endl;
+    temp = notificator.display();
+    std::for_each(temp.begin(), temp.end(), [](notification &n)
+                  { std::cout << n.getMessage() << " " << n.getDate() << " " << n.getTime() << std::endl; });
+
+    /*
     // Crear cola de prioridad para los enemigos
     std::priority_queue<Enemy *, std::vector<Enemy *>, CompareEnemy> enemyQueue;
 
@@ -269,6 +323,6 @@ int main()
     // Iniciar el juego
     GameManager &gameManager = GameManager::getInstance();
     gameManager.run();
-
+    */
     return 0;
 }
