@@ -8,7 +8,6 @@
 #include <set>
 #include <algorithm>
 
-
 using namespace std;
 
 // Clase Armadura
@@ -132,10 +131,13 @@ class Enemigo {
 public:
     string nombre;
     int nivel;
+    int salud;
+    int ataque;
 
-    Enemigo(string nombre, int nivel) : nombre(nombre), nivel(nivel) {}
+    Enemigo(string nombre, int nivel, int salud, int ataque)
+        : nombre(nombre), nivel(nivel), salud(salud), ataque(ataque) {}
 
-    bool operator<(const Enemigo& e) const {
+    bool operator>(const Enemigo& e) const {
         return nivel > e.nivel;  // Para ordenar en la priority_queue de menor a mayor nivel
     }
 };
@@ -171,13 +173,21 @@ public:
 class Juego {
 private:
     Personaje jugador;
-    priority_queue<Enemigo> enemigos;  // Usar priority_queue para enfrentar enemigos de menor a mayor nivel
+    priority_queue<Enemigo, vector<Enemigo>, greater<Enemigo>> enemigos;  // Usar priority_queue para enfrentar enemigos de menor a mayor nivel
 
 public:
     Juego(string nombreJugador, int nivelJugador) : jugador(nombreJugador, nivelJugador) {}
 
-    void agregarEnemigo(string nombre, int nivel) {
-        enemigos.push(Enemigo(nombre, nivel));
+    void agregarEnemigo(string nombre, int nivel, int salud, int ataque) {
+        enemigos.push(Enemigo(nombre, nivel, salud, ataque));
+    }
+
+    void enfrentarEnemigos() {
+        while (!enemigos.empty()) {
+            Enemigo enemigo = enemigos.top();
+            enemigos.pop();
+            cout << "Enfrentando a " << enemigo.nombre << " de nivel " << enemigo.nivel << endl;
+        }
     }
 
     void guardarPartida() {
@@ -207,6 +217,60 @@ public:
     void iniciar() {
         // Lógica para iniciar el juego (simulada)
         cout << "Juego iniciado." << endl;
+    }
+
+    void mostrarMenu() {
+        int opcion = -1;
+        while (opcion != 0) {
+            cout << "\nMenu:\n";
+            cout << "1. Agregar enemigo\n";
+            cout << "2. Enfrentar enemigos\n";
+            cout << "3. Guardar partida\n";
+            cout << "4. Alertar victoria\n";
+            cout << "5. Navegar mapa\n";
+            cout << "0. Salir\n";
+            cout << "Elige una opción: ";
+            cin >> opcion;
+
+            switch (opcion) {
+                case 1: {
+                    string nombre;
+                    int nivel, salud, ataque;
+                    cout << "Ingrese nombre del enemigo: ";
+                    cin >> nombre;
+                    cout << "Ingrese nivel del enemigo: ";
+                    cin >> nivel;
+                    cout << "Ingrese salud del enemigo: ";
+                    cin >> salud;
+                    cout << "Ingrese ataque del enemigo: ";
+                    cin >> ataque;
+                    agregarEnemigo(nombre, nivel, salud, ataque);
+                    break;
+                }
+                case 2:
+                    enfrentarEnemigos();
+                    break;
+                case 3:
+                    guardarPartida();
+                    break;
+                case 4:
+                    alertarVictoria();
+                    break;
+                case 5: {
+                    string destino;
+                    cout << "Ingrese destino: ";
+                    cin >> destino;
+                    navegarMapa(destino);
+                    break;
+                }
+                case 0:
+                    cout << "Saliendo del juego...\n";
+                    break;
+                default:
+                    cout << "Opción inválida. Inténtalo de nuevo.\n";
+                    break;
+            }
+        }
     }
 };
 
@@ -239,6 +303,12 @@ int main() {
         cout << lugar << " ";
     }
     cout << endl;
+
+    // Crear el juego
+    Juego miJuego("Heroe", 1);
+
+    // Mostrar el menú para interactuar con el juego
+    miJuego.mostrarMenu();
 
     return 0;
 }
