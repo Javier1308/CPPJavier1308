@@ -1,3 +1,0 @@
-D:/Desktop/CPPJavier1308/cmake-build-debug/CMakeFiles/C__.dir
-D:/Desktop/CPPJavier1308/cmake-build-debug/CMakeFiles/edit_cache.dir
-D:/Desktop/CPPJavier1308/cmake-build-debug/CMakeFiles/rebuild_cache.dir
