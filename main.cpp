@@ -6,6 +6,7 @@
 #include <queue>
 #include <unordered_map>
 #include <set>
+#include <algorithm>
 
 
 using namespace std;
@@ -214,11 +215,11 @@ int main() {
     Mapa* mapa = Mapa::obtenerInstancia();
     mapa->agregarNodo("Aldea");
     mapa->agregarNodo("Bosque");
-    mapa->agregarNodo("Montaña");
+    mapa->agregarNodo("Montania");
     mapa->agregarNodo("Cueva");
     mapa->conectarNodos("Aldea", "Bosque");
-    mapa->conectarNodos("Bosque", "Montaña");
-    mapa->conectarNodos("Montaña", "Cueva");
+    mapa->conectarNodos("Bosque", "Montania");
+    mapa->conectarNodos("Montania", "Cueva");
 
     // Imprimir el mapa
     mapa->imprimirMapa();
@@ -232,8 +233,8 @@ int main() {
     cout << endl;
 
     // Encontrar la ruta desde la Aldea a la Montaña
-    list<string> ruta = mapa->encontrarRuta("Aldea", "Montaña");
-    cout << "Ruta de Aldea a Montaña: ";
+    list<string> ruta = mapa->encontrarRuta("Aldea", "Montania");
+    cout << "Ruta de Aldea a Montania: ";
     for (const string& lugar : ruta) {
         cout << lugar << " ";
     }
